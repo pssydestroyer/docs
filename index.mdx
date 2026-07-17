@@ -3,13 +3,9 @@ title: "Introduction"
 description: "Accept fiat payments and manage payouts through one clean JSON API. Start here for the base URL, authentication, the response envelope, the payment lifecycle, and everything you'll rely on in every request."
 ---
 
-<Callout>
-  **New here?** Read this page once end to end. It covers the conventions — authentication, the response envelope, pagination, money, idempotency, and errors — that every other page assumes you already know.
-</Callout>
-
 ## What you can build
 
-The Ecca Merchant API turns a checkout into three moving parts: you **create an invoice**, send your customer to a **hosted payment page**, and receive a **webhook** when the money settles. Everything else — listing invoices, reading payouts, discovering payment methods and live rates — is there to support that core flow.
+The Ecca Merchant API turns a checkout into three moving parts: you **create an invoice**, send your customer to a **hosted payment page**, and receive a **webhook** when the money settles.
 
 <Columns cols="2">
   <Card title="Accept a payment" icon="receipt" horizontal="false" href="/invoices">
@@ -121,14 +117,6 @@ The Ecca Merchant API turns a checkout into three moving parts: you **create an 
   </Step>
   <Step title="Receive the webhook" title-type="p">
     When the invoice settles, we `POST` to your `callback_url` with the final status. Acknowledge with `2xx`. Treat the webhook as the source of truth for fulfillment — see [WebHooks](/webhooks).
-  </Step>
-  <Step title="(Optional) Confirm by polling" title-type="p">
-    As a fallback, read the invoice any time with its `order_id` **or** your `external_id`:
-
-    ```bash
-    curl https://api.ecca.example/api/v1/external/invoices/order-4821 \
-      -H "X-Api-Key: $ECCA_KEY"
-    ```
   </Step>
 </Steps>
 
@@ -328,7 +316,21 @@ Creating an invoice is **idempotent on your \*\*\*\*`external_id`**. Retry `POST
 
 ## Rate limiting
 
-Requests are rate limited per API key. Over the limit → `429 RATE_LIMITED`. Back off and retry with exponential backoff. Some resources add their own guard, e.g. `429 TOO_MANY_UNPAID_INVOICES` when too many invoices sit unpaid.
+Requests are rate limited **per API key**. The current limit is **100 requests per 60 seconds**. Over the limit → `429 RATE_LIMITED`; back off and retry with exponential backoff. Some resources add their own guard, e.g. `429 TOO_MANY_UNPAID_INVOICES` when too many invoices sit unpaid.
+
+Every response carries your current budget in headers:
+
+| Header | Meaning |
+| --- | --- |
+| `X-RateLimit-Limit` | Requests allowed per window |
+| `X-RateLimit-Remaining` | Requests left in the current window |
+| `X-RateLimit-Reset` | Seconds until the window resets |
+
+On a `429`, the response also includes a `Retry-After` header (seconds) and `details.retry_after_seconds`.
+
+<Callout>
+  These limits are current defaults and may change without notice. Don't hardcode the numbers — read the `X-RateLimit-*` headers and honor `Retry-After` on `429`.
+</Callout>
 
 ## Errors
 
