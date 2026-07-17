@@ -479,13 +479,10 @@
       "BalanceType": {
         "type": "string",
         "enum": [
-          "usdt",
-          "security_deposit",
-          "referral",
-          "team_lead"
+          "usdt"
         ],
         "title": "BalanceType",
-        "description": "Тип балансу трейдера для виводу (мерчант — лише USDT)."
+        "description": "Balance type. Merchant withdrawals are always USDT."
       },
       "CurrencyShort": {
         "properties": {
@@ -520,8 +517,7 @@
           "name",
           "symbol"
         ],
-        "title": "CurrencyShort",
-        "description": "Стислий вигляд для вкладення (напр. у платіжний метод)."
+        "title": "CurrencyShort"
       },
       "HTTPValidationError": {
         "properties": {
@@ -570,8 +566,7 @@
           "expected_amount_usdt",
           "actual_amount_usdt"
         ],
-        "title": "InvoiceAdjustment",
-        "description": "Коригування суми у спорі: очікуване vs фактичне (fiat + usdt)."
+        "title": "InvoiceAdjustment"
       },
       "InvoiceExternalRead": {
         "properties": {
@@ -716,8 +711,7 @@
           "expires_at",
           "is_adjusted"
         ],
-        "title": "InvoiceExternalRead",
-        "description": "Мерчант-API (X-Api-Key): інвойс + стан оплати без внутрішньої кухні угоди.\n\namount / amount_to_send — ОРИГІНАЛЬНІ (замовлення). Фактичне (при коригуванні) —\nв adjustment + settled_amount_usdt. Deal-поля null, поки метод не обрано."
+        "title": "InvoiceExternalRead"
       },
       "MerchantInvoiceCreate": {
         "properties": {
@@ -942,8 +936,7 @@
           "currency",
           "price"
         ],
-        "title": "MerchantRateRead",
-        "description": "Курс USDT/фіат для мерчант-API: валюта + ціна.\n\nПоказуємо лише курс, що реально застосовується до угод (платформа+сторона\nз налаштувань). Джерело курсу мерчанту не розкриваємо."
+        "title": "MerchantRateRead"
       },
       "Page_InvoiceExternalRead_": {
         "properties": {
@@ -1057,8 +1050,7 @@
         "required": [
           "name"
         ],
-        "title": "PaymentMethodBrief",
-        "description": "Метод, який обрав клієнт (для мерчанта). null, поки метод не обрано."
+        "title": "PaymentMethodBrief"
       },
       "PaymentMethodExternalRead": {
         "properties": {
@@ -1126,8 +1118,7 @@
           "client_commission_percent",
           "merchant_commission_percent"
         ],
-        "title": "PaymentMethodExternalRead",
-        "description": "Мерчант-API каталог: метод + ліміти + комісія (частки) для цього бізнесу."
+        "title": "PaymentMethodExternalRead"
       },
       "Success_InvoiceExternalRead_": {
         "properties": {
@@ -1530,8 +1521,7 @@
           "payload",
           "attempts_history"
         ],
-        "title": "WebhookDeliveryDetail",
-        "description": "Деталі: + URL, payload, повна історія спроб."
+        "title": "WebhookDeliveryDetail"
       },
       "WithdrawalRead": {
         "properties": {
@@ -1660,8 +1650,7 @@
           "amount_issue",
           "verification_required"
         ],
-        "title": "WithdrawalRejectCode",
-        "description": "Передвизначені причини відмови — фронт локалізує. Інакше — reject_reason (текст)."
+        "title": "WithdrawalRejectCode"
       },
       "WithdrawalStatus": {
         "type": "string",
