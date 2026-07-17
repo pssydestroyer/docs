@@ -30,13 +30,13 @@
         "group": "Getting Started",
         "pages": [
           "index",
+          "authentication",
           "errors",
           "invoices",
           "payment-methods",
           "webhooks",
           "withdrawals",
-          "currencies",
-          "authentication"
+          "currencies"
         ]
       },
       {
