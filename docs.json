@@ -21,21 +21,7 @@
         "group": "API Reference",
         "openapi": "api-reference/ecca-merchant-api.json"
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/images/1776636603802-cktyw6pekxj-logo-dark(1).webp",
