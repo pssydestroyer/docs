@@ -491,19 +491,26 @@
         "properties": {
           "id": {
             "type": "integer",
-            "title": "Id"
+            "title": "Id",
+            "example": 1
           },
           "code": {
             "type": "string",
-            "title": "Code"
+            "title": "Code",
+            "description": "Currency code.",
+            "example": "UAH"
           },
           "name": {
             "type": "string",
-            "title": "Name"
+            "title": "Name",
+            "description": "Currency name.",
+            "example": "Ukrainian hryvnia"
           },
           "symbol": {
             "type": "string",
-            "title": "Symbol"
+            "title": "Symbol",
+            "description": "Currency symbol.",
+            "example": "₴"
           }
         },
         "type": "object",
@@ -533,19 +540,27 @@
         "properties": {
           "expected_amount_fiat": {
             "type": "string",
-            "title": "Expected Amount Fiat"
+            "title": "Expected Amount Fiat",
+            "description": "Fiat you originally ordered.",
+            "example": "1050.00"
           },
           "actual_amount_fiat": {
             "type": "string",
-            "title": "Actual Amount Fiat"
+            "title": "Actual Amount Fiat",
+            "description": "Fiat actually paid.",
+            "example": "1000.00"
           },
           "expected_amount_usdt": {
             "type": "string",
-            "title": "Expected Amount Usdt"
+            "title": "Expected Amount Usdt",
+            "description": "USDT expected at the ordered amount.",
+            "example": "26.05"
           },
           "actual_amount_usdt": {
             "type": "string",
-            "title": "Actual Amount Usdt"
+            "title": "Actual Amount Usdt",
+            "description": "USDT actually credited.",
+            "example": "24.80"
           }
         },
         "type": "object",
@@ -563,72 +578,94 @@
           "uuid": {
             "type": "string",
             "format": "uuid",
-            "title": "Uuid"
+            "title": "Uuid",
+            "description": "Our order id.",
+            "example": "9f2c1e5a-3b7d-4e21-a0c9-1f2e3d4c5b6a"
           },
           "external_id": {
             "type": "string",
-            "title": "External Id"
+            "title": "External Id",
+            "description": "Your order id.",
+            "example": "order-4821"
           },
           "customer_id": {
             "type": "string",
-            "title": "Customer Id"
+            "title": "Customer Id",
+            "description": "Your customer id.",
+            "example": "user-99"
           },
           "purpose": {
             "title": "Purpose",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "Order #4821"
           },
           "amount": {
             "type": "string",
-            "title": "Amount"
+            "title": "Amount",
+            "description": "Base order amount in fiat (unchanged).",
+            "example": "1050.00"
           },
           "amount_to_send": {
             "title": "Amount To Send",
+            "description": "Amount the customer pays (with commission). Null until a method is chosen.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "1071.00"
           },
           "currency": {
             "$ref": "#/components/schemas/CurrencyShort"
           },
           "status": {
-            "$ref": "#/components/schemas/MerchantInvoiceStatus"
+            "$ref": "#/components/schemas/MerchantInvoiceStatus",
+            "example": "success"
           },
           "callback_url": {
             "title": "Callback Url",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://shop.example/webhooks/ecca"
           },
           "success_url": {
             "title": "Success Url",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://shop.example/paid"
           },
           "fail_url": {
             "title": "Fail Url",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://shop.example/failed"
           },
           "payment_url": {
             "type": "string",
-            "title": "Payment Url"
+            "title": "Payment Url",
+            "description": "Hosted payment link.",
+            "example": "https://pay.ecca.example/pay/9f2c1e5a-...?token=..."
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Created At"
+            "title": "Created At",
+            "example": "2026-07-16T09:24:11Z"
           },
           "expires_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Expires At"
+            "title": "Expires At",
+            "example": "2026-07-16T09:39:11Z"
           },
           "finished_at": {
             "title": "Finished At",
+            "description": "When the invoice reached a terminal state.",
             "nullable": true,
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2026-07-16T09:33:02Z"
           },
           "payment_method": {
+            "description": "Method the customer chose. Null until selected.",
             "nullable": true,
             "allOf": [
               {
@@ -638,19 +675,26 @@
           },
           "rate": {
             "title": "Rate",
+            "description": "Fiat-per-USDT rate snapshot.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "41.20"
           },
           "settled_amount_usdt": {
             "title": "Settled Amount Usdt",
+            "description": "USDT credited to you. Populated only on success.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "24.80"
           },
           "is_adjusted": {
             "type": "boolean",
-            "title": "Is Adjusted"
+            "title": "Is Adjusted",
+            "description": "Whether the paid amount was corrected during a dispute.",
+            "example": false
           },
           "adjustment": {
+            "description": "Present only when is_adjusted is true.",
             "nullable": true,
             "allOf": [
               {
@@ -664,23 +708,13 @@
           "uuid",
           "external_id",
           "customer_id",
-          "purpose",
           "amount",
-          "amount_to_send",
           "currency",
           "status",
-          "callback_url",
-          "success_url",
-          "fail_url",
           "payment_url",
           "created_at",
           "expires_at",
-          "finished_at",
-          "payment_method",
-          "rate",
-          "settled_amount_usdt",
-          "is_adjusted",
-          "adjustment"
+          "is_adjusted"
         ],
         "title": "InvoiceExternalRead",
         "description": "Мерчант-API (X-Api-Key): інвойс + стан оплати без внутрішньої кухні угоди.\n\namount / amount_to_send — ОРИГІНАЛЬНІ (замовлення). Фактичне (при коригуванні) —\nв adjustment + settled_amount_usdt. Deal-поля null, поки метод не обрано."
@@ -691,13 +725,17 @@
             "type": "string",
             "maxLength": 128,
             "minLength": 1,
-            "title": "External Id"
+            "title": "External Id",
+            "description": "Your own order id. Unique per business; used for idempotency.",
+            "example": "order-4821"
           },
           "customer_id": {
             "type": "string",
             "maxLength": 128,
             "minLength": 1,
-            "title": "Customer Id"
+            "title": "Customer Id",
+            "description": "Your identifier for the paying customer.",
+            "example": "user-99"
           },
           "amount": {
             "anyOf": [
@@ -710,37 +748,49 @@
                 "type": "string"
               }
             ],
-            "title": "Amount"
+            "title": "Amount",
+            "description": "Base order amount in fiat. Positive, max 2 decimal places.",
+            "example": "1050.00"
           },
           "currency": {
             "type": "string",
             "maxLength": 16,
             "minLength": 2,
-            "title": "Currency"
+            "title": "Currency",
+            "description": "Fiat currency code. Must be active and allowed for your business.",
+            "example": "UAH"
           },
           "purpose": {
             "title": "Purpose",
+            "description": "Optional order description shown to the customer.",
             "nullable": true,
             "type": "string",
-            "maxLength": 255
+            "maxLength": 255,
+            "example": "Order #4821"
           },
           "callback_url": {
             "title": "Callback Url",
+            "description": "HTTPS webhook URL for settlement. Falls back to business settings.",
             "nullable": true,
             "type": "string",
-            "maxLength": 512
+            "maxLength": 512,
+            "example": "https://shop.example/webhooks/ecca"
           },
           "success_url": {
             "title": "Success Url",
+            "description": "HTTPS redirect after successful payment. Falls back to settings.",
             "nullable": true,
             "type": "string",
-            "maxLength": 512
+            "maxLength": 512,
+            "example": "https://shop.example/paid"
           },
           "fail_url": {
             "title": "Fail Url",
+            "description": "HTTPS redirect after failed payment. Falls back to settings.",
             "nullable": true,
             "type": "string",
-            "maxLength": 512
+            "maxLength": 512,
+            "example": "https://shop.example/failed"
           }
         },
         "type": "object",
@@ -757,65 +807,87 @@
           "uuid": {
             "type": "string",
             "format": "uuid",
-            "title": "Uuid"
+            "title": "Uuid",
+            "description": "Our order id. Look the invoice up by this or by external_id.",
+            "example": "9f2c1e5a-3b7d-4e21-a0c9-1f2e3d4c5b6a"
           },
           "external_id": {
             "type": "string",
-            "title": "External Id"
+            "title": "External Id",
+            "description": "Your order id.",
+            "example": "order-4821"
           },
           "customer_id": {
             "type": "string",
-            "title": "Customer Id"
+            "title": "Customer Id",
+            "description": "Your customer id.",
+            "example": "user-99"
           },
           "purpose": {
             "title": "Purpose",
+            "description": "Order description.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "Order #4821"
           },
           "amount": {
             "type": "string",
-            "title": "Amount"
+            "title": "Amount",
+            "description": "Base order amount in fiat.",
+            "example": "1050.00"
           },
           "amount_to_send": {
             "title": "Amount To Send",
+            "description": "Amount the customer pays (with client commission). Null until a method is chosen.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "1071.00"
           },
           "currency": {
             "$ref": "#/components/schemas/CurrencyShort"
           },
           "status": {
-            "$ref": "#/components/schemas/MerchantInvoiceStatus"
+            "$ref": "#/components/schemas/MerchantInvoiceStatus",
+            "description": "Invoice status.",
+            "example": "pending"
           },
           "callback_url": {
             "title": "Callback Url",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://shop.example/webhooks/ecca"
           },
           "success_url": {
             "title": "Success Url",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://shop.example/paid"
           },
           "fail_url": {
             "title": "Fail Url",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://shop.example/failed"
           },
           "payment_url": {
             "title": "Payment Url",
+            "description": "Hosted payment link. Returned only to the creator (X-Api-Key); null on the public read.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://pay.ecca.example/pay/9f2c1e5a-...?token=..."
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Created At"
+            "title": "Created At",
+            "example": "2026-07-16T09:24:11Z"
           },
           "expires_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Expires At"
+            "title": "Expires At",
+            "description": "Current deadline. Switches from method-selection to payment window once a method is picked.",
+            "example": "2026-07-16T09:39:11Z"
           }
         },
         "type": "object",
@@ -823,14 +895,9 @@
           "uuid",
           "external_id",
           "customer_id",
-          "purpose",
           "amount",
-          "amount_to_send",
           "currency",
           "status",
-          "callback_url",
-          "success_url",
-          "fail_url",
           "created_at",
           "expires_at"
         ],
@@ -851,17 +918,23 @@
         "properties": {
           "currency": {
             "type": "string",
-            "title": "Currency"
+            "title": "Currency",
+            "description": "Fiat currency code.",
+            "example": "UAH"
           },
           "price": {
             "type": "string",
-            "title": "Price"
+            "title": "Price",
+            "description": "Price of 1 USDT in that fiat.",
+            "example": "41.20"
           },
           "updated_at": {
             "title": "Updated At",
+            "description": "When this rate was last refreshed.",
             "nullable": true,
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2026-07-16T09:24:11Z"
           }
         },
         "type": "object",
@@ -968,18 +1041,21 @@
         "properties": {
           "name": {
             "type": "string",
-            "title": "Name"
+            "title": "Name",
+            "description": "Payment method name.",
+            "example": "Monobank"
           },
           "logo_url": {
             "title": "Logo Url",
+            "description": "Method logo URL.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://cdn.ecca.example/methods/monobank.png"
           }
         },
         "type": "object",
         "required": [
-          "name",
-          "logo_url"
+          "name"
         ],
         "title": "PaymentMethodBrief",
         "description": "Метод, який обрав клієнт (для мерчанта). null, поки метод не обрано."
@@ -988,46 +1064,61 @@
         "properties": {
           "id": {
             "type": "integer",
-            "title": "Id"
+            "title": "Id",
+            "description": "Payment method id.",
+            "example": 12
           },
           "name": {
             "type": "string",
-            "title": "Name"
+            "title": "Name",
+            "description": "Method name.",
+            "example": "Monobank"
           },
           "logo_url": {
             "title": "Logo Url",
+            "description": "Method logo URL.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://cdn.ecca.example/methods/monobank.png"
           },
           "currency": {
             "$ref": "#/components/schemas/CurrencyShort"
           },
           "min_amount": {
             "type": "string",
-            "title": "Min Amount"
+            "title": "Min Amount",
+            "description": "Minimum order amount (fiat).",
+            "example": "100.00"
           },
           "max_amount": {
             "type": "string",
-            "title": "Max Amount"
+            "title": "Max Amount",
+            "description": "Maximum order amount (fiat).",
+            "example": "29999.00"
           },
           "total_commission_percent": {
             "type": "string",
-            "title": "Total Commission Percent"
+            "title": "Total Commission Percent",
+            "description": "Your category's total commission ceiling (client + merchant).",
+            "example": "5.00"
           },
           "client_commission_percent": {
             "type": "string",
-            "title": "Client Commission Percent"
+            "title": "Client Commission Percent",
+            "description": "Added on top of the order amount — paid by the customer.",
+            "example": "2.00"
           },
           "merchant_commission_percent": {
             "type": "string",
-            "title": "Merchant Commission Percent"
+            "title": "Merchant Commission Percent",
+            "description": "Withheld from your proceeds.",
+            "example": "3.00"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "logo_url",
           "currency",
           "min_amount",
           "max_amount",
@@ -1240,15 +1331,21 @@
         "properties": {
           "attempt_number": {
             "type": "integer",
-            "title": "Attempt Number"
+            "title": "Attempt Number",
+            "description": "Attempt number within the round.",
+            "example": 1
           },
           "round": {
             "type": "integer",
-            "title": "Round"
+            "title": "Round",
+            "description": "Delivery round (increments on manual resend).",
+            "example": 1
           },
           "triggered_by": {
             "type": "string",
-            "title": "Triggered By"
+            "title": "Triggered By",
+            "description": "What triggered the attempt: system, admin, or merchant.",
+            "example": "system"
           },
           "triggered_uuid_user": {
             "title": "Triggered Uuid User",
@@ -1258,31 +1355,40 @@
           },
           "status_code": {
             "title": "Status Code",
+            "description": "HTTP status returned by your endpoint.",
             "nullable": true,
-            "type": "integer"
+            "type": "integer",
+            "example": 200
           },
           "success": {
             "type": "boolean",
-            "title": "Success"
+            "title": "Success",
+            "description": "Whether the attempt got a 2xx.",
+            "example": true
           },
           "response_body": {
             "title": "Response Body",
+            "description": "Truncated response body.",
             "nullable": true,
             "type": "string"
           },
           "error": {
             "title": "Error",
+            "description": "Transport error, if any.",
             "nullable": true,
             "type": "string"
           },
           "duration_ms": {
             "type": "integer",
-            "title": "Duration Ms"
+            "title": "Duration Ms",
+            "description": "Attempt duration in ms.",
+            "example": 142
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Created At"
+            "title": "Created At",
+            "example": "2026-07-16T09:24:11Z"
           }
         },
         "type": "object",
@@ -1290,11 +1396,7 @@
           "attempt_number",
           "round",
           "triggered_by",
-          "triggered_uuid_user",
-          "status_code",
           "success",
-          "response_body",
-          "error",
           "duration_ms",
           "created_at"
         ],
@@ -1305,83 +1407,110 @@
           "uuid": {
             "type": "string",
             "format": "uuid",
-            "title": "Uuid"
+            "title": "Uuid",
+            "description": "Delivery id (matches the X-Webhook-Id header).",
+            "example": "7d2e9b10-1a2b-3c4d-5e6f-7a8b9c0d1e2f"
           },
           "business_uuid": {
             "type": "string",
             "format": "uuid",
-            "title": "Business Uuid"
+            "title": "Business Uuid",
+            "example": "b1a2c3d4-0000-0000-0000-000000000001"
           },
           "invoice_uuid": {
             "type": "string",
             "format": "uuid",
-            "title": "Invoice Uuid"
+            "title": "Invoice Uuid",
+            "example": "9f2c1e5a-3b7d-4e21-a0c9-1f2e3d4c5b6a"
           },
           "event": {
             "type": "string",
-            "title": "Event"
+            "title": "Event",
+            "description": "Webhook event name.",
+            "example": "invoice.paid"
           },
           "status": {
             "type": "string",
-            "title": "Status"
+            "title": "Status",
+            "description": "Delivery status: pending, delivering, delivered, or failed.",
+            "example": "delivered"
           },
           "attempts": {
             "type": "integer",
-            "title": "Attempts"
+            "title": "Attempts",
+            "description": "Attempts made so far.",
+            "example": 1
           },
           "max_attempts": {
             "type": "integer",
-            "title": "Max Attempts"
+            "title": "Max Attempts",
+            "description": "Total attempts before giving up.",
+            "example": 7
           },
           "resend_count": {
             "type": "integer",
-            "title": "Resend Count"
+            "title": "Resend Count",
+            "description": "Manual resends triggered.",
+            "example": 0
           },
           "last_status_code": {
             "title": "Last Status Code",
+            "description": "HTTP status of the most recent attempt.",
             "nullable": true,
-            "type": "integer"
+            "type": "integer",
+            "example": 200
           },
           "last_error": {
             "title": "Last Error",
+            "description": "Most recent transport error.",
             "nullable": true,
             "type": "string"
           },
           "next_attempt_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Next Attempt At"
+            "title": "Next Attempt At",
+            "description": "When the next retry is scheduled.",
+            "example": "2026-07-16T09:25:11Z"
           },
           "delivered_at": {
             "title": "Delivered At",
+            "description": "When a 2xx was received.",
             "nullable": true,
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2026-07-16T09:24:12Z"
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Created At"
+            "title": "Created At",
+            "example": "2026-07-16T09:24:11Z"
           },
           "updated_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Updated At"
+            "title": "Updated At",
+            "example": "2026-07-16T09:24:12Z"
           },
           "target_url": {
             "type": "string",
-            "title": "Target Url"
+            "title": "Target Url",
+            "description": "Destination URL of the delivery.",
+            "example": "https://shop.example/webhooks/ecca"
           },
           "payload": {
             "type": "object",
-            "title": "Payload"
+            "title": "Payload",
+            "description": "The JSON body that was sent."
           },
           "attempts_history": {
             "items": {
               "$ref": "#/components/schemas/WebhookAttemptRead"
             },
             "type": "array",
-            "title": "Attempts History"
+            "title": "Attempts History",
+            "description": "Per-attempt log."
           }
         },
         "type": "object",
@@ -1394,10 +1523,7 @@
           "attempts",
           "max_attempts",
           "resend_count",
-          "last_status_code",
-          "last_error",
           "next_attempt_at",
-          "delivered_at",
           "created_at",
           "updated_at",
           "target_url",
@@ -1412,53 +1538,76 @@
           "uuid": {
             "type": "string",
             "format": "uuid",
-            "title": "Uuid"
+            "title": "Uuid",
+            "description": "Withdrawal id.",
+            "example": "3af1c2d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
           },
           "actor": {
             "type": "string",
-            "title": "Actor"
+            "title": "Actor",
+            "description": "Who requested it.",
+            "example": "merchant"
           },
           "balance_type": {
-            "$ref": "#/components/schemas/BalanceType"
+            "$ref": "#/components/schemas/BalanceType",
+            "example": "usdt"
           },
           "token": {
             "type": "string",
-            "title": "Token"
+            "title": "Token",
+            "description": "Payout asset.",
+            "example": "USDT"
           },
           "network": {
             "type": "string",
-            "title": "Network"
+            "title": "Network",
+            "description": "Blockchain network.",
+            "example": "TRC20"
           },
           "logo_url": {
             "title": "Logo Url",
+            "description": "Network/method logo.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "https://cdn.ecca.example/networks/trc20.png"
           },
           "address": {
             "type": "string",
-            "title": "Address"
+            "title": "Address",
+            "description": "Destination wallet address.",
+            "example": "TQ...destination"
           },
           "amount": {
             "type": "string",
-            "title": "Amount"
+            "title": "Amount",
+            "description": "Requested amount.",
+            "example": "500.00"
           },
           "network_commission": {
             "type": "string",
-            "title": "Network Commission"
+            "title": "Network Commission",
+            "description": "Network fee deducted.",
+            "example": "1.00"
           },
           "amount_to_send": {
             "type": "string",
-            "title": "Amount To Send"
+            "title": "Amount To Send",
+            "description": "Actually sent (amount minus network_commission).",
+            "example": "499.00"
           },
           "status": {
-            "$ref": "#/components/schemas/WithdrawalStatus"
+            "$ref": "#/components/schemas/WithdrawalStatus",
+            "example": "approved"
           },
           "tx_hash": {
             "title": "Tx Hash",
+            "description": "On-chain transaction hash. Present once approved.",
             "nullable": true,
-            "type": "string"
+            "type": "string",
+            "example": "a1b2c3..."
           },
           "reject_code": {
+            "description": "Rejection code (when rejected).",
             "nullable": true,
             "allOf": [
               {
@@ -1468,19 +1617,22 @@
           },
           "reject_reason": {
             "title": "Reject Reason",
+            "description": "Free-text rejection reason (when no code applies).",
             "nullable": true,
             "type": "string"
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "title": "Created At"
+            "title": "Created At",
+            "example": "2026-07-16T09:24:11Z"
           },
           "processed_at": {
             "title": "Processed At",
             "nullable": true,
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "example": "2026-07-16T09:40:02Z"
           }
         },
         "type": "object",
@@ -1490,17 +1642,12 @@
           "balance_type",
           "token",
           "network",
-          "logo_url",
           "address",
           "amount",
           "network_commission",
           "amount_to_send",
           "status",
-          "tx_hash",
-          "reject_code",
-          "reject_reason",
-          "created_at",
-          "processed_at"
+          "created_at"
         ],
         "title": "WithdrawalRead"
       },
