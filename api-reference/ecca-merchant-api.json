@@ -9,7 +9,7 @@
     "/api/v1/external/rates": {
       "get": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "List Rates",
         "operationId": "list_rates_api_v1_external_rates_get",
@@ -35,7 +35,7 @@
     "/api/v1/external/invoices": {
       "post": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "Create Invoice",
         "operationId": "create_invoice_api_v1_external_invoices_post",
@@ -79,7 +79,7 @@
       },
       "get": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "List Invoices",
         "operationId": "list_invoices_api_v1_external_invoices_get",
@@ -164,7 +164,7 @@
     "/api/v1/external/invoices/{ident}": {
       "get": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "Get Invoice",
         "operationId": "get_invoice_api_v1_external_invoices__ident__get",
@@ -211,7 +211,7 @@
     "/api/v1/external/invoices/{ident}/webhooks": {
       "get": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "List Invoice Webhooks",
         "operationId": "list_invoice_webhooks_api_v1_external_invoices__ident__webhooks_get",
@@ -258,7 +258,7 @@
     "/api/v1/external/invoices/{ident}/resend-webhook": {
       "post": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "Resend Invoice Webhook",
         "operationId": "resend_invoice_webhook_api_v1_external_invoices__ident__resend_webhook_post",
@@ -305,7 +305,7 @@
     "/api/v1/external/withdrawals": {
       "get": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "List Withdrawals",
         "operationId": "list_withdrawals_api_v1_external_withdrawals_get",
@@ -380,7 +380,7 @@
     "/api/v1/external/withdrawals/{withdrawal_uuid}": {
       "get": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "Get Withdrawal",
         "operationId": "get_withdrawal_api_v1_external_withdrawals__withdrawal_uuid__get",
@@ -428,7 +428,7 @@
     "/api/v1/external/payment-methods": {
       "get": {
         "tags": [
-          "external"
+          "Merchant API"
         ],
         "summary": "List Payment Methods",
         "operationId": "list_payment_methods_api_v1_external_payment_methods_get",
@@ -1540,7 +1540,7 @@
   },
   "tags": [
     {
-      "name": "external",
+      "name": "Merchant API",
       "description": "Merchant API"
     }
   ],
