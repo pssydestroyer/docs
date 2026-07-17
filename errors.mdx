@@ -16,15 +16,15 @@ Every failed request returns `success: false` and an `error` object. Branch your
 }
 ```
 
-<ResponseField name="code" required="false" deprecated="false">
+<ResponseField name="code">
   Stable machine-readable identifier. Match on this.
 </ResponseField>
 
-<ResponseField name="message" required="false" deprecated="false">
+<ResponseField name="message">
   Human-readable description. For logs and debugging; do not parse.
 </ResponseField>
 
-<ResponseField name="details" required="false" deprecated="false">
+<ResponseField name="details">
   Optional context. Present on some errors (e.g. the conflicting `external_id`, or the field map on validation errors).
 </ResponseField>
 
@@ -121,14 +121,14 @@ Returned on any endpoint when limits are exceeded.
 
 ## Handling strategy
 
-<ResponseField name="4xx (except 429)" required="false" deprecated="false">
+<ResponseField name="4xx (except 429)">
   Client error — fix the request. Do not blind-retry; the same call fails again.
 </ResponseField>
 
-<ResponseField name="429" required="false" deprecated="false">
+<ResponseField name="429">
   Back off and retry with exponential backoff.
 </ResponseField>
 
-<ResponseField name="5xx" required="false" deprecated="false">
+<ResponseField name="5xx">
   Transient — retry idempotent calls with backoff. Invoice creation is safe to retry thanks to `external_id` idempotency.
 </ResponseField>

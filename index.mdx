@@ -132,23 +132,23 @@ flowchart LR
   A -. rare .-> E[fail]
 ```
 
-<ResponseField name="pending" required="false" deprecated="false">
+<ResponseField name="pending">
   Created and waiting for the customer to pay. Has a live `payment_url` and an `expires_at`.
 </ResponseField>
 
-<ResponseField name="success" required="false" deprecated="false">
+<ResponseField name="success">
   Paid and credited. Fulfill the order. A webhook is delivered.
 </ResponseField>
 
-<ResponseField name="expired" required="false" deprecated="false">
+<ResponseField name="expired">
   The payment window elapsed before payment. Create a new invoice to retry.
 </ResponseField>
 
-<ResponseField name="canceled" required="false" deprecated="false">
+<ResponseField name="canceled">
   Cancelled before payment.
 </ResponseField>
 
-<ResponseField name="fail" required="false" deprecated="false">
+<ResponseField name="fail">
   A rare technical failure during settlement. Safe to treat like a non-success.
 </ResponseField>
 
@@ -174,15 +174,11 @@ flowchart LR
   A server-to-server callback we send to your `callback_url` when an invoice's status changes to a terminal state. Idempotent and retried on failure — see [WebHooks](/webhooks).
 </Expandable>
 
-## Base URL & versioning
+## Base URL
 
 ```typescript
 https://api.ecca.example/api/v1/external
 ```
-
-<Callout>
-  `v1` is the API version. Breaking changes ship under a new version prefix. Additive changes — new fields, new endpoints — can appear within `v1`, so **ignore unknown JSON fields** instead of failing on them.
-</Callout>
 
 ## Authentication
 
@@ -225,27 +221,27 @@ Errors mirror it under `error`:
 }
 ```
 
-<ResponseField name="success" required="false" deprecated="false">
+<ResponseField name="success">
   `true` on success, `false` on error. Always check this first.
 </ResponseField>
 
-<ResponseField name="data" required="false" deprecated="false">
+<ResponseField name="data">
   Present when `success` is `true`. The endpoint's payload (an object, or a [page](#pagination) for lists).
 </ResponseField>
 
-<ResponseField name="error" required="false" deprecated="false">
+<ResponseField name="error">
   Present when `success` is `false`.
 
   <Expandable title="properties">
-    <ResponseField name="code" required="false" deprecated="false">
+    <ResponseField name="code">
       Stable machine-readable code. **Branch on this**, not on the message.
     </ResponseField>
 
-    <ResponseField name="message" required="false" deprecated="false">
+    <ResponseField name="message">
       Human-readable text. May change between releases — don't parse it.
     </ResponseField>
 
-    <ResponseField name="details" required="false" deprecated="false">
+    <ResponseField name="details">
       Optional context. For validation errors, a map of `field → [messages]`.
     </ResponseField>
   </Expandable>

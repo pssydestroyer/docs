@@ -9,7 +9,7 @@ description: "Discover which payment methods, currencies, amount ranges, and com
 
 `GET /external/payment-methods` → `list<PaymentMethodExternalRead>`
 
-<ParamField query="currency" required="false" deprecated="false">
+<ParamField query="currency">
   Optional currency-code filter, e.g. `UAH`. Narrows the list to methods in that currency. An unknown code returns an empty list, not an error.
 </ParamField>
 

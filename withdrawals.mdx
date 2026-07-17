@@ -59,15 +59,15 @@ Withdrawal id. Payout asset, e.g. `USDT`. Blockchain network, e.g. `TRC20`. Dest
 
 ## Lifecycle
 
-<ResponseField name="pending" required="false" deprecated="false">
+<ResponseField name="pending">
   Requested and awaiting review. The balance is already reserved.
 </ResponseField>
 
-<ResponseField name="approved" required="false" deprecated="false">
+<ResponseField name="approved">
   Sent on-chain — `tx_hash` is populated. Track it on the network explorer.
 </ResponseField>
 
-<ResponseField name="rejected" required="false" deprecated="false">
+<ResponseField name="rejected">
   Declined; the balance is returned. See `reject_code` / `reject_reason`.
 </ResponseField>
 

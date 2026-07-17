@@ -48,15 +48,15 @@ Each request is validated in order:
 
 ## Account & key states
 
-<ResponseField name="Key revoked" required="false" deprecated="false">
+<ResponseField name="Key revoked">
   A key can be revoked from the dashboard, or automatically when a business is banned. All requests with it return `403 API_KEY_REVOKED`. Issue a new key to restore access.
 </ResponseField>
 
-<ResponseField name="Business not active" required="false" deprecated="false">
+<ResponseField name="Business not active">
   Only an `active` business can call the API. Other states — such as `pending_verification`, `ready_to_start`, `rejected`, or `banned` — return `403 BUSINESS_NOT_ACTIVE` with the exact state in `details.status`.
 </ResponseField>
 
-<ResponseField name="Account blocked" required="false" deprecated="false">
+<ResponseField name="Account blocked">
   If the underlying account is blocked, every request returns `403 MERCHANT_BLOCKED` regardless of key or business state.
 </ResponseField>
 

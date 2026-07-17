@@ -7,25 +7,21 @@ An **invoice** is a single payment order. You create it, redirect the customer t
 
 ## Before you create
 
-A create call must satisfy every condition below, checked in this order. Each maps to a specific error (see [Errors](/errors)).
+A create call must satisfy every condition below. Each maps to a specific error (see [Errors](/errors)).
 
-<ResponseField name="Payments enabled" required="false" deprecated="false">
-  Payments must be enabled platform-wide. Otherwise `403 DEALS_DISABLED`.
-</ResponseField>
-
-<ResponseField name="Currency active and allowed" required="false" deprecated="false">
+<ResponseField name="Currency active and allowed">
   The `currency` code must exist and be active (`404 CURRENCY_NOT_FOUND`) **and** be one of the currencies enabled for your business (`422 CURRENCY_NOT_ALLOWED`). See [Allowed currencies](#allowed-currencies).
 </ResponseField>
 
-<ResponseField name="Amount fits a method" required="false" deprecated="false">
+<ResponseField name="Amount fits a method">
   The `amount` must fall within the min/max range of at least one active payment method for that currency. Otherwise `422 AMOUNT_OUT_OF_RANGE`.
 </ResponseField>
 
-<ResponseField name="Redirect & callback URLs present" required="false" deprecated="false">
+<ResponseField name="Redirect & callback URLs present">
   `callback_url`, `success_url`, and `fail_url` must each be resolvable — from the request or from your business settings. Missing ones → `422 INVOICE_URLS_MISSING` with `details.missing`.
 </ResponseField>
 
-<ResponseField name="Unpaid-invoice limit" required="false" deprecated="false">
+<ResponseField name="Unpaid-invoice limit">
   A customer may not exceed the platform's cap of open unpaid invoices within a rolling window. Otherwise `429 TOO_MANY_UNPAID_INVOICES`.
 </ResponseField>
 
@@ -43,35 +39,35 @@ Each business is provisioned with a set of enabled currencies. A currency that e
 
 ### Request
 
-<ParamField body="external_id" required="false" deprecated="false">
+<ParamField body="external_id">
   Your own order id (1–128 chars). Used for [idempotency](#idempotency) and to look the invoice up later.
 </ParamField>
 
-<ParamField body="customer_id" required="false" deprecated="false">
+<ParamField body="customer_id">
   Your identifier for the paying customer (1–128 chars). Used for the unpaid-invoice limit.
 </ParamField>
 
-<ParamField body="amount" required="false" deprecated="false">
+<ParamField body="amount">
   Base order amount in fiat. Positive, at most 2 decimal places. Send as a string: `"1050.00"`.
 </ParamField>
 
-<ParamField body="currency" required="false" deprecated="false">
+<ParamField body="currency">
   Currency code, e.g. `"UAH"` (2–16 chars). Must be active and allowed for your business.
 </ParamField>
 
-<ParamField body="purpose" required="false" deprecated="false">
+<ParamField body="purpose">
   Optional description (≤255 chars).
 </ParamField>
 
-<ParamField body="callback_url" required="false" deprecated="false">
+<ParamField body="callback_url">
   HTTPS webhook URL for settlement callbacks. Falls back to your business settings if omitted.
 </ParamField>
 
-<ParamField body="success_url" required="false" deprecated="false">
+<ParamField body="success_url">
   HTTPS URL the customer returns to after a successful payment. Falls back to settings.
 </ParamField>
 
-<ParamField body="fail_url" required="false" deprecated="false">
+<ParamField body="fail_url">
   HTTPS URL for a failed/abandoned payment. Falls back to settings.
 </ParamField>
 
@@ -211,7 +207,7 @@ Beyond the create fields, the read includes the settlement state (all `null` unt
 
 When the invoice reached a terminal state. `{ name, logo_url }` — the method the customer chose. Fiat-per-USDT rate snapshot of the deal. USDT credited to you. Populated only on `success`. Whether the paid amount was corrected during a dispute.
 
-<ResponseField name="adjustment" required="false" deprecated="false">
+<ResponseField name="adjustment">
   Present only when `is_adjusted`.
 
   <Expandable title="adjustment">
