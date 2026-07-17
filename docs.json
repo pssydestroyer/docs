@@ -16,6 +16,10 @@
           "index",
           "quickstart"
         ]
+      },
+      {
+        "group": "API Reference",
+        "openapi": "api-reference/ecca-merchant-api.json"
       }
     ],
     "global": {

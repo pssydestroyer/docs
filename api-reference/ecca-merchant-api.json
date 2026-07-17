@@ -1,0 +1,1552 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Ecca Merchant API",
+    "version": "0.1.0",
+    "description": "Public merchant integration API (X-Api-Key)."
+  },
+  "paths": {
+    "/api/v1/external/rates": {
+      "get": {
+        "tags": [
+          "external"
+        ],
+        "summary": "List Rates",
+        "operationId": "list_rates_api_v1_external_rates_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_list_MerchantRateRead__"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ]
+      }
+    },
+    "/api/v1/external/invoices": {
+      "post": {
+        "tags": [
+          "external"
+        ],
+        "summary": "Create Invoice",
+        "operationId": "create_invoice_api_v1_external_invoices_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MerchantInvoiceCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_MerchantInvoiceRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "external"
+        ],
+        "summary": "List Invoices",
+        "operationId": "list_invoices_api_v1_external_invoices_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "title": "Status",
+              "nullable": true,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/MerchantInvoiceStatus"
+                }
+              ]
+            }
+          },
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "title": "Currency",
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Per Page"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_Page_InvoiceExternalRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/external/invoices/{ident}": {
+      "get": {
+        "tags": [
+          "external"
+        ],
+        "summary": "Get Invoice",
+        "operationId": "get_invoice_api_v1_external_invoices__ident__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ident",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ident"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_InvoiceExternalRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/external/invoices/{ident}/webhooks": {
+      "get": {
+        "tags": [
+          "external"
+        ],
+        "summary": "List Invoice Webhooks",
+        "operationId": "list_invoice_webhooks_api_v1_external_invoices__ident__webhooks_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ident",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ident"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_list_WebhookDeliveryDetail__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/external/invoices/{ident}/resend-webhook": {
+      "post": {
+        "tags": [
+          "external"
+        ],
+        "summary": "Resend Invoice Webhook",
+        "operationId": "resend_invoice_webhook_api_v1_external_invoices__ident__resend_webhook_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ident",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Ident"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_WebhookDeliveryDetail_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/external/withdrawals": {
+      "get": {
+        "tags": [
+          "external"
+        ],
+        "summary": "List Withdrawals",
+        "operationId": "list_withdrawals_api_v1_external_withdrawals_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "title": "Status",
+              "nullable": true,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/WithdrawalStatus"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Per Page"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_Page_WithdrawalRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/external/withdrawals/{withdrawal_uuid}": {
+      "get": {
+        "tags": [
+          "external"
+        ],
+        "summary": "Get Withdrawal",
+        "operationId": "get_withdrawal_api_v1_external_withdrawals__withdrawal_uuid__get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "withdrawal_uuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Withdrawal Uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_WithdrawalRead_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/external/payment-methods": {
+      "get": {
+        "tags": [
+          "external"
+        ],
+        "summary": "List Payment Methods",
+        "operationId": "list_payment_methods_api_v1_external_payment_methods_get",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "currency",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "title": "Currency",
+              "nullable": true,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Success_list_PaymentMethodExternalRead__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BalanceType": {
+        "type": "string",
+        "enum": [
+          "usdt",
+          "security_deposit",
+          "referral",
+          "team_lead"
+        ],
+        "title": "BalanceType",
+        "description": "Тип балансу трейдера для виводу (мерчант — лише USDT)."
+      },
+      "CurrencyShort": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "symbol": {
+            "type": "string",
+            "title": "Symbol"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "name",
+          "symbol"
+        ],
+        "title": "CurrencyShort",
+        "description": "Стислий вигляд для вкладення (напр. у платіжний метод)."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "InvoiceAdjustment": {
+        "properties": {
+          "expected_amount_fiat": {
+            "type": "string",
+            "title": "Expected Amount Fiat"
+          },
+          "actual_amount_fiat": {
+            "type": "string",
+            "title": "Actual Amount Fiat"
+          },
+          "expected_amount_usdt": {
+            "type": "string",
+            "title": "Expected Amount Usdt"
+          },
+          "actual_amount_usdt": {
+            "type": "string",
+            "title": "Actual Amount Usdt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "expected_amount_fiat",
+          "actual_amount_fiat",
+          "expected_amount_usdt",
+          "actual_amount_usdt"
+        ],
+        "title": "InvoiceAdjustment",
+        "description": "Коригування суми у спорі: очікуване vs фактичне (fiat + usdt)."
+      },
+      "InvoiceExternalRead": {
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Uuid"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "nullable": true,
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount"
+          },
+          "amount_to_send": {
+            "title": "Amount To Send",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyShort"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MerchantInvoiceStatus"
+          },
+          "callback_url": {
+            "title": "Callback Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "success_url": {
+            "title": "Success Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "fail_url": {
+            "title": "Fail Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "payment_url": {
+            "type": "string",
+            "title": "Payment Url"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          },
+          "finished_at": {
+            "title": "Finished At",
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "payment_method": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethodBrief"
+              }
+            ]
+          },
+          "rate": {
+            "title": "Rate",
+            "nullable": true,
+            "type": "string"
+          },
+          "settled_amount_usdt": {
+            "title": "Settled Amount Usdt",
+            "nullable": true,
+            "type": "string"
+          },
+          "is_adjusted": {
+            "type": "boolean",
+            "title": "Is Adjusted"
+          },
+          "adjustment": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/InvoiceAdjustment"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "uuid",
+          "external_id",
+          "customer_id",
+          "purpose",
+          "amount",
+          "amount_to_send",
+          "currency",
+          "status",
+          "callback_url",
+          "success_url",
+          "fail_url",
+          "payment_url",
+          "created_at",
+          "expires_at",
+          "finished_at",
+          "payment_method",
+          "rate",
+          "settled_amount_usdt",
+          "is_adjusted",
+          "adjustment"
+        ],
+        "title": "InvoiceExternalRead",
+        "description": "Мерчант-API (X-Api-Key): інвойс + стан оплати без внутрішньої кухні угоди.\n\namount / amount_to_send — ОРИГІНАЛЬНІ (замовлення). Фактичне (при коригуванні) —\nв adjustment + settled_amount_usdt. Deal-поля null, поки метод не обрано."
+      },
+      "MerchantInvoiceCreate": {
+        "properties": {
+          "external_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "External Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Customer Id"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": true,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 16,
+            "minLength": 2,
+            "title": "Currency"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "nullable": true,
+            "type": "string",
+            "maxLength": 255
+          },
+          "callback_url": {
+            "title": "Callback Url",
+            "nullable": true,
+            "type": "string",
+            "maxLength": 512
+          },
+          "success_url": {
+            "title": "Success Url",
+            "nullable": true,
+            "type": "string",
+            "maxLength": 512
+          },
+          "fail_url": {
+            "title": "Fail Url",
+            "nullable": true,
+            "type": "string",
+            "maxLength": 512
+          }
+        },
+        "type": "object",
+        "required": [
+          "external_id",
+          "customer_id",
+          "amount",
+          "currency"
+        ],
+        "title": "MerchantInvoiceCreate"
+      },
+      "MerchantInvoiceRead": {
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Uuid"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          },
+          "customer_id": {
+            "type": "string",
+            "title": "Customer Id"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "nullable": true,
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount"
+          },
+          "amount_to_send": {
+            "title": "Amount To Send",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyShort"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MerchantInvoiceStatus"
+          },
+          "callback_url": {
+            "title": "Callback Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "success_url": {
+            "title": "Success Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "fail_url": {
+            "title": "Fail Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "payment_url": {
+            "title": "Payment Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "uuid",
+          "external_id",
+          "customer_id",
+          "purpose",
+          "amount",
+          "amount_to_send",
+          "currency",
+          "status",
+          "callback_url",
+          "success_url",
+          "fail_url",
+          "created_at",
+          "expires_at"
+        ],
+        "title": "MerchantInvoiceRead"
+      },
+      "MerchantInvoiceStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "success",
+          "fail",
+          "expired",
+          "canceled"
+        ],
+        "title": "MerchantInvoiceStatus"
+      },
+      "MerchantRateRead": {
+        "properties": {
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "price": {
+            "type": "string",
+            "title": "Price"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "currency",
+          "price"
+        ],
+        "title": "MerchantRateRead",
+        "description": "Курс USDT/фіат для мерчант-API: валюта + ціна.\n\nПоказуємо лише курс, що реально застосовується до угод (платформа+сторона\nз налаштувань). Джерело курсу мерчанту не розкриваємо."
+      },
+      "Page_InvoiceExternalRead_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceExternalRead"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page"
+          },
+          "total_items": {
+            "type": "integer",
+            "title": "Total Items"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          },
+          "has_next": {
+            "type": "boolean",
+            "title": "Has Next"
+          },
+          "has_prev": {
+            "type": "boolean",
+            "title": "Has Prev"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "per_page",
+          "total_items",
+          "total_pages",
+          "has_next",
+          "has_prev"
+        ],
+        "title": "Page[InvoiceExternalRead]"
+      },
+      "Page_WithdrawalRead_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WithdrawalRead"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page"
+          },
+          "total_items": {
+            "type": "integer",
+            "title": "Total Items"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          },
+          "has_next": {
+            "type": "boolean",
+            "title": "Has Next"
+          },
+          "has_prev": {
+            "type": "boolean",
+            "title": "Has Prev"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "page",
+          "per_page",
+          "total_items",
+          "total_pages",
+          "has_next",
+          "has_prev"
+        ],
+        "title": "Page[WithdrawalRead]"
+      },
+      "PaymentMethodBrief": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "logo_url": {
+            "title": "Logo Url",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "logo_url"
+        ],
+        "title": "PaymentMethodBrief",
+        "description": "Метод, який обрав клієнт (для мерчанта). null, поки метод не обрано."
+      },
+      "PaymentMethodExternalRead": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "logo_url": {
+            "title": "Logo Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "currency": {
+            "$ref": "#/components/schemas/CurrencyShort"
+          },
+          "min_amount": {
+            "type": "string",
+            "title": "Min Amount"
+          },
+          "max_amount": {
+            "type": "string",
+            "title": "Max Amount"
+          },
+          "total_commission_percent": {
+            "type": "string",
+            "title": "Total Commission Percent"
+          },
+          "client_commission_percent": {
+            "type": "string",
+            "title": "Client Commission Percent"
+          },
+          "merchant_commission_percent": {
+            "type": "string",
+            "title": "Merchant Commission Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "logo_url",
+          "currency",
+          "min_amount",
+          "max_amount",
+          "total_commission_percent",
+          "client_commission_percent",
+          "merchant_commission_percent"
+        ],
+        "title": "PaymentMethodExternalRead",
+        "description": "Мерчант-API каталог: метод + ліміти + комісія (частки) для цього бізнесу."
+      },
+      "Success_InvoiceExternalRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/InvoiceExternalRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[InvoiceExternalRead]"
+      },
+      "Success_MerchantInvoiceRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/MerchantInvoiceRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[MerchantInvoiceRead]"
+      },
+      "Success_Page_InvoiceExternalRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Page_InvoiceExternalRead_"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[Page[InvoiceExternalRead]]"
+      },
+      "Success_Page_WithdrawalRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/Page_WithdrawalRead_"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[Page[WithdrawalRead]]"
+      },
+      "Success_WebhookDeliveryDetail_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/WebhookDeliveryDetail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[WebhookDeliveryDetail]"
+      },
+      "Success_WithdrawalRead_": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "$ref": "#/components/schemas/WithdrawalRead"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[WithdrawalRead]"
+      },
+      "Success_list_MerchantRateRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/MerchantRateRead"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[list[MerchantRateRead]]"
+      },
+      "Success_list_PaymentMethodExternalRead__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentMethodExternalRead"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[list[PaymentMethodExternalRead]]"
+      },
+      "Success_list_WebhookDeliveryDetail__": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "default": true
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookDeliveryDetail"
+            },
+            "type": "array",
+            "title": "Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "Success[list[WebhookDeliveryDetail]]"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WebhookAttemptRead": {
+        "properties": {
+          "attempt_number": {
+            "type": "integer",
+            "title": "Attempt Number"
+          },
+          "round": {
+            "type": "integer",
+            "title": "Round"
+          },
+          "triggered_by": {
+            "type": "string",
+            "title": "Triggered By"
+          },
+          "triggered_uuid_user": {
+            "title": "Triggered Uuid User",
+            "nullable": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          "status_code": {
+            "title": "Status Code",
+            "nullable": true,
+            "type": "integer"
+          },
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "response_body": {
+            "title": "Response Body",
+            "nullable": true,
+            "type": "string"
+          },
+          "error": {
+            "title": "Error",
+            "nullable": true,
+            "type": "string"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "title": "Duration Ms"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attempt_number",
+          "round",
+          "triggered_by",
+          "triggered_uuid_user",
+          "status_code",
+          "success",
+          "response_body",
+          "error",
+          "duration_ms",
+          "created_at"
+        ],
+        "title": "WebhookAttemptRead"
+      },
+      "WebhookDeliveryDetail": {
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Uuid"
+          },
+          "business_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Business Uuid"
+          },
+          "invoice_uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Invoice Uuid"
+          },
+          "event": {
+            "type": "string",
+            "title": "Event"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "title": "Max Attempts"
+          },
+          "resend_count": {
+            "type": "integer",
+            "title": "Resend Count"
+          },
+          "last_status_code": {
+            "title": "Last Status Code",
+            "nullable": true,
+            "type": "integer"
+          },
+          "last_error": {
+            "title": "Last Error",
+            "nullable": true,
+            "type": "string"
+          },
+          "next_attempt_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Next Attempt At"
+          },
+          "delivered_at": {
+            "title": "Delivered At",
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "target_url": {
+            "type": "string",
+            "title": "Target Url"
+          },
+          "payload": {
+            "type": "object",
+            "title": "Payload"
+          },
+          "attempts_history": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookAttemptRead"
+            },
+            "type": "array",
+            "title": "Attempts History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "uuid",
+          "business_uuid",
+          "invoice_uuid",
+          "event",
+          "status",
+          "attempts",
+          "max_attempts",
+          "resend_count",
+          "last_status_code",
+          "last_error",
+          "next_attempt_at",
+          "delivered_at",
+          "created_at",
+          "updated_at",
+          "target_url",
+          "payload",
+          "attempts_history"
+        ],
+        "title": "WebhookDeliveryDetail",
+        "description": "Деталі: + URL, payload, повна історія спроб."
+      },
+      "WithdrawalRead": {
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Uuid"
+          },
+          "actor": {
+            "type": "string",
+            "title": "Actor"
+          },
+          "balance_type": {
+            "$ref": "#/components/schemas/BalanceType"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token"
+          },
+          "network": {
+            "type": "string",
+            "title": "Network"
+          },
+          "logo_url": {
+            "title": "Logo Url",
+            "nullable": true,
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "title": "Address"
+          },
+          "amount": {
+            "type": "string",
+            "title": "Amount"
+          },
+          "network_commission": {
+            "type": "string",
+            "title": "Network Commission"
+          },
+          "amount_to_send": {
+            "type": "string",
+            "title": "Amount To Send"
+          },
+          "status": {
+            "$ref": "#/components/schemas/WithdrawalStatus"
+          },
+          "tx_hash": {
+            "title": "Tx Hash",
+            "nullable": true,
+            "type": "string"
+          },
+          "reject_code": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/WithdrawalRejectCode"
+              }
+            ]
+          },
+          "reject_reason": {
+            "title": "Reject Reason",
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "processed_at": {
+            "title": "Processed At",
+            "nullable": true,
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "uuid",
+          "actor",
+          "balance_type",
+          "token",
+          "network",
+          "logo_url",
+          "address",
+          "amount",
+          "network_commission",
+          "amount_to_send",
+          "status",
+          "tx_hash",
+          "reject_code",
+          "reject_reason",
+          "created_at",
+          "processed_at"
+        ],
+        "title": "WithdrawalRead"
+      },
+      "WithdrawalRejectCode": {
+        "type": "string",
+        "enum": [
+          "transfer_error",
+          "invalid_address",
+          "suspicious_activity",
+          "amount_issue",
+          "verification_required"
+        ],
+        "title": "WithdrawalRejectCode",
+        "description": "Передвизначені причини відмови — фронт локалізує. Інакше — reject_reason (текст)."
+      },
+      "WithdrawalStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "rejected"
+        ],
+        "title": "WithdrawalStatus"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Api-Key"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "external",
+      "description": "Merchant API"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api.ecca.example"
+    }
+  ]
+}
