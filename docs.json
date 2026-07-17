@@ -30,7 +30,6 @@
         "group": "Getting Started",
         "pages": [
           "index",
-          "quickstart",
           "errors",
           "invoices",
           "untitled-page",
