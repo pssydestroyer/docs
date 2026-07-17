@@ -1,0 +1,237 @@
+---
+title: "Invoices"
+description: "Create payment orders, track their state, and resolve them by your own id. Full reference for the invoice endpoints, fields, preconditions, and allowed currencies."
+---
+
+An **invoice** is a single payment order. You create it, redirect the customer to the returned `payment_url`, and the invoice moves through its [lifecycle](/introduction#payment-lifecycle) to a terminal status. Confirm the result via a [webhook](/webhooks) or by reading the invoice.
+
+## Before you create
+
+A create call must satisfy every condition below, checked in this order. Each maps to a specific error (see [Errors](/errors)).
+
+<ResponseField name="Payments enabled" required="false" deprecated="false">
+  Payments must be enabled platform-wide. Otherwise `403 DEALS_DISABLED`.
+</ResponseField>
+
+<ResponseField name="Currency active and allowed" required="false" deprecated="false">
+  The `currency` code must exist and be active (`404 CURRENCY_NOT_FOUND`) **and** be one of the currencies enabled for your business (`422 CURRENCY_NOT_ALLOWED`). See [Allowed currencies](#allowed-currencies).
+</ResponseField>
+
+<ResponseField name="Amount fits a method" required="false" deprecated="false">
+  The `amount` must fall within the min/max range of at least one active payment method for that currency. Otherwise `422 AMOUNT_OUT_OF_RANGE`.
+</ResponseField>
+
+<ResponseField name="Redirect & callback URLs present" required="false" deprecated="false">
+  `callback_url`, `success_url`, and `fail_url` must each be resolvable — from the request or from your business settings. Missing ones → `422 INVOICE_URLS_MISSING` with `details.missing`.
+</ResponseField>
+
+<ResponseField name="Unpaid-invoice limit" required="false" deprecated="false">
+  A customer may not exceed the platform's cap of open unpaid invoices within a rolling window. Otherwise `429 TOO_MANY_UNPAID_INVOICES`.
+</ResponseField>
+
+## Allowed currencies
+
+Each business is provisioned with a set of enabled currencies. A currency that exists globally but isn't enabled for you returns `422 CURRENCY_NOT_ALLOWED`.
+
+<Callout>
+  Don't hardcode currencies. Discover what you can actually charge from [`GET /external/payment-methods`](/payment-methods) — each method carries its `currency`, `min_amount`, and `max_amount`. That endpoint is the source of truth for both allowed currencies and valid amount ranges.
+</Callout>
+
+## Create an invoice
+
+`POST /external/invoices` → `201`
+
+### Request
+
+<ParamField body="external_id" required="false" deprecated="false">
+  Your own order id (1–128 chars). Used for [idempotency](#idempotency) and to look the invoice up later.
+</ParamField>
+
+<ParamField body="customer_id" required="false" deprecated="false">
+  Your identifier for the paying customer (1–128 chars). Used for the unpaid-invoice limit.
+</ParamField>
+
+<ParamField body="amount" required="false" deprecated="false">
+  Base order amount in fiat. Positive, at most 2 decimal places. Send as a string: `"1050.00"`.
+</ParamField>
+
+<ParamField body="currency" required="false" deprecated="false">
+  Currency code, e.g. `"UAH"` (2–16 chars). Must be active and allowed for your business.
+</ParamField>
+
+<ParamField body="purpose" required="false" deprecated="false">
+  Optional description (≤255 chars).
+</ParamField>
+
+<ParamField body="callback_url" required="false" deprecated="false">
+  HTTPS webhook URL for settlement callbacks. Falls back to your business settings if omitted.
+</ParamField>
+
+<ParamField body="success_url" required="false" deprecated="false">
+  HTTPS URL the customer returns to after a successful payment. Falls back to settings.
+</ParamField>
+
+<ParamField body="fail_url" required="false" deprecated="false">
+  HTTPS URL for a failed/abandoned payment. Falls back to settings.
+</ParamField>
+
+<Callout>
+  URL resolution priority is **request → business settings**. Set defaults once in the dashboard and omit them per call, or override per invoice. An empty string counts as missing.
+</Callout>
+
+<CodeGroup show-lines="true">
+
+```bash
+curl -X POST https://api.ecca.example/api/v1/external/invoices \
+  -H "X-Api-Key: $ECCA_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "external_id": "order-4821",
+    "customer_id": "user-99",
+    "amount": "1050.00",
+    "currency": "UAH",
+    "purpose": "Order #4821"
+  }'
+```
+
+```python
+import httpx
+
+resp = httpx.post(
+    "https://api.ecca.example/api/v1/external/invoices",
+    headers={"X-Api-Key": ECCA_KEY},
+    json={
+        "external_id": "order-4821",
+        "customer_id": "user-99",
+        "amount": "1050.00",
+        "currency": "UAH",
+        "purpose": "Order #4821",
+    },
+)
+invoice = resp.json()["data"]
+```
+
+```javascript
+const resp = await fetch(
+  "https://api.ecca.example/api/v1/external/invoices",
+  {
+    method: "POST",
+    headers: {
+      "X-Api-Key": process.env.ECCA_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      external_id: "order-4821",
+      customer_id: "user-99",
+      amount: "1050.00",
+      currency: "UAH",
+      purpose: "Order #4821",
+    }),
+  },
+);
+const { data: invoice } = await resp.json();
+```
+
+</CodeGroup>
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "uuid": "9f2c1e5a-3b7d-4e21-a0c9-1f2e3d4c5b6a",
+    "external_id": "order-4821",
+    "customer_id": "user-99",
+    "purpose": "Order #4821",
+    "amount": "1050.00",
+    "amount_to_send": null,
+    "currency": { "id": 1, "code": "UAH", "name": "Ukrainian hryvnia", "symbol": "₴" },
+    "status": "pending",
+    "callback_url": "https://shop.example/webhooks/ecca",
+    "success_url": "https://shop.example/paid",
+    "fail_url": "https://shop.example/failed",
+    "payment_url": "https://pay.ecca.example/pay/9f2c1e5a-...?token=...",
+    "created_at": "2026-07-16T09:24:11Z",
+    "expires_at": "2026-07-16T09:39:11Z"
+  }
+}
+```
+
+Our order id. Look the invoice up by this or `external_id`. Base order amount, unchanged for the invoice's life. What the customer pays, including client commission. `null` until a method is chosen. `{ id, code, name, symbol }`. One of `pending`, `success`, `expired`, `canceled`, `fail`. Ready-to-use hosted payment link. Returned only on create and read-by-creator. When the invoice auto-cancels if unpaid (platform-configured TTL).
+
+<Callout>
+  Redirect to `payment_url` right away, or persist it. The invoice auto-cancels at `expires_at` if the customer hasn't paid — after that, create a new invoice.
+</Callout>
+
+### Errors
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `VALIDATION_ERROR` | `422` | Malformed body (amount precision, missing field, bad URL) |
+| `DEALS_DISABLED` | `403` | Payments temporarily disabled platform-wide |
+| `CURRENCY_NOT_FOUND` | `404` | `currency` code unknown or inactive |
+| `CURRENCY_NOT_ALLOWED` | `422` | Currency not enabled for your business |
+| `AMOUNT_OUT_OF_RANGE` | `422` | Amount fits no active payment method |
+| `INVOICE_URLS_MISSING` | `422` | URL(s) absent from request and settings (`details.missing`) |
+| `TOO_MANY_UNPAID_INVOICES` | `429` | Customer over the open-unpaid cap |
+| `INVOICE_ALREADY_EXISTS` | `409` | `external_id` reused with different params or on a closed invoice |
+
+## Idempotency
+
+Creating is idempotent on `external_id`, scoped to your business:
+
+- **Same `external_id`, still `pending`, same `amount` \+ \*\*\*\*`currency`** → returns the **existing** invoice (same `payment_url`). Safe to retry on network errors.
+- **Same `external_id`, but different params or already terminal** → `409 INVOICE_ALREADY_EXISTS` with `details.status`. A closed order is never revived.
+
+<Callout>
+  Use a stable `external_id` per order and a retry can never double-charge or create a duplicate.
+</Callout>
+
+## List invoices
+
+`GET /external/invoices` → `Page<InvoiceExternalRead>`
+
+1-based page number. Items per page. Filter by status: `pending`, `success`, `expired`, `canceled`, `fail`. Filter by currency code, e.g. `UAH`.
+
+Returns the standard [page envelope](/introduction#pagination); each item is the same shape as [Get an invoice](#get-an-invoice).
+
+## Get an invoice
+
+`GET /external/invoices/{ident}` → `InvoiceExternalRead`
+
+`{ident}` is **either** our `order_id` (the `uuid`) **or** your `external_id` — both resolve within your business.
+
+```bash
+curl https://api.ecca.example/api/v1/external/invoices/order-4821 \
+  -H "X-Api-Key: $ECCA_KEY"
+```
+
+Beyond the create fields, the read includes the settlement state (all `null` until the customer picks a method):
+
+When the invoice reached a terminal state. `{ name, logo_url }` — the method the customer chose. Fiat-per-USDT rate snapshot of the deal. USDT credited to you. Populated only on `success`. Whether the paid amount was corrected during a dispute.
+
+<ResponseField name="adjustment" required="false" deprecated="false">
+  Present only when `is_adjusted`.
+
+  <Expandable title="adjustment">
+    Originally expected fiat. Actually paid fiat. Originally expected USDT. Actually credited USDT.
+  </Expandable>
+</ResponseField>
+
+<Callout>
+  `amount` stays the original order amount even after an adjustment. The real settled figures live in `settled_amount_usdt` and `adjustment`. Reconcile payouts against those, not against `amount`.
+</Callout>
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `MERCHANT_INVOICE_NOT_FOUND` | `404` | No invoice for the given `order_id`/`external_id` |
+
+## Invoice webhooks
+
+Two endpoints inspect and re-trigger the settlement callbacks for an invoice:
+
+- `GET /external/invoices/{ident}/webhooks` — delivery history for the invoice.
+- `POST /external/invoices/{ident}/resend-webhook` — send the latest delivery now.
+
+Full payload shape, signing, retries, and error codes are on the [WebHooks](/webhooks) page.

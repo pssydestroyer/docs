@@ -1,0 +1,134 @@
+---
+title: "Errors"
+description: "Error envelope, validation format, and the full catalog of error codes returned by the Ecca Merchant API."
+---
+
+Every failed request returns `success: false` and an `error` object. Branch your logic on the stable `error.code` — never on the HTTP status alone or the human-readable `message` (which may change).
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVOICE_ALREADY_EXISTS",
+    "message": "An invoice with this external_id already exists",
+    "details": { "external_id": "order-4821", "status": "pending" }
+  }
+}
+```
+
+<ResponseField name="code" required="false" deprecated="false">
+  Stable machine-readable identifier. Match on this.
+</ResponseField>
+
+<ResponseField name="message" required="false" deprecated="false">
+  Human-readable description. For logs and debugging; do not parse.
+</ResponseField>
+
+<ResponseField name="details" required="false" deprecated="false">
+  Optional context. Present on some errors (e.g. the conflicting `external_id`, or the field map on validation errors).
+</ResponseField>
+
+## Validation errors
+
+A malformed request body or query returns `422 VALIDATION_ERROR` with `details` as a map of `field → [messages]`:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation error",
+    "details": {
+      "amount": ["must have at most 2 decimal places"],
+      "currency": ["field required"]
+    }
+  }
+}
+```
+
+## Authentication & account
+
+Returned on any endpoint.
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `API_KEY_INVALID` | `401` | `X-Api-Key` header missing or unknown |
+| `API_KEY_REVOKED` | `403` | The key was revoked |
+| `BUSINESS_NOT_ACTIVE` | `403` | Your business is not active (`details.status`) |
+| `MERCHANT_BLOCKED` | `403` | The merchant account is blocked |
+
+## Invoices
+
+`POST /external/invoices`, `GET /external/invoices`, `GET /external/invoices/{ident}`.
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `VALIDATION_ERROR` | `422` | Invalid body (e.g. amount precision, missing field) |
+| `CURRENCY_NOT_FOUND` | `404` | `currency` code does not exist |
+| `CURRENCY_NOT_ALLOWED` | `422` | Currency is not enabled for your business |
+| `AMOUNT_OUT_OF_RANGE` | `422` | Amount fits no active payment method |
+| `INVOICE_URLS_MISSING` | `422` | No `callback_url`/`success_url`/`fail_url` in request or settings (`details.missing`) |
+| `INVOICE_ALREADY_EXISTS` | `409` | `external_id` already used (`details.external_id`, `details.status`) |
+| `TOO_MANY_UNPAID_INVOICES` | `429` | Too many unpaid invoices open; retry later |
+| `DEALS_DISABLED` | `403` | Payments are temporarily disabled platform-wide |
+| `MERCHANT_INVOICE_NOT_FOUND` | `404` | No invoice for the given `order_id`/`external_id` |
+
+<Callout>
+  `INVOICE_ALREADY_EXISTS` is idempotency working as intended — the `details` carry the existing invoice's status, so you can reconcile without creating a duplicate.
+</Callout>
+
+## Webhooks
+
+`GET /external/invoices/{ident}/webhooks`, `POST /external/invoices/{ident}/resend-webhook`.
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `MERCHANT_INVOICE_NOT_FOUND` | `404` | The invoice does not exist |
+| `WEBHOOK_NOT_FOUND` | `404` | No webhook delivery for this invoice |
+| `WEBHOOK_NOT_RESENDABLE` | `409` | Delivery cannot be resent in its current state |
+| `WEBHOOK_RESEND_TOO_SOON` | `429` | Manual resend is throttled; retry shortly |
+
+## Withdrawals
+
+`GET /external/withdrawals`, `GET /external/withdrawals/{withdrawal_uuid}`.
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `WITHDRAWAL_NOT_FOUND` | `404` | No withdrawal for the given `withdrawal_uuid` |
+
+## Rates
+
+`GET /external/rates`.
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `RATE_UNAVAILABLE` | `503` | Exchange rate temporarily unavailable; retry |
+
+## Rate limiting
+
+Returned on any endpoint when limits are exceeded.
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `RATE_LIMITED` | `429` | Too many requests for your API key; back off and retry |
+
+## Server-side
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `INTERNAL_ERROR` | `500` | Unexpected server error; safe to retry idempotent calls |
+| `DB_UNAVAILABLE` | `503` | Database temporarily unavailable; retry with backoff |
+
+## Handling strategy
+
+<ResponseField name="4xx (except 429)" required="false" deprecated="false">
+  Client error — fix the request. Do not blind-retry; the same call fails again.
+</ResponseField>
+
+<ResponseField name="429" required="false" deprecated="false">
+  Back off and retry with exponential backoff.
+</ResponseField>
+
+<ResponseField name="5xx" required="false" deprecated="false">
+  Transient — retry idempotent calls with backoff. Invoice creation is safe to retry thanks to `external_id` idempotency.
+</ResponseField>
