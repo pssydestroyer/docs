@@ -1,0 +1,62 @@
+---
+title: "Payment Methods"
+description: "Discover which payment methods, currencies, amount ranges, and commissions are enabled for your business."
+---
+
+`GET /external/payment-methods` returns the catalog of methods available to **your** business.
+
+## List payment methods
+
+`GET /external/payment-methods` → `list<PaymentMethodExternalRead>`
+
+<ParamField query="currency" required="false" deprecated="false">
+  Optional currency-code filter, e.g. `UAH`. Narrows the list to methods in that currency. An unknown code returns an empty list, not an error.
+</ParamField>
+
+```bash
+curl "https://api.ecca.example/api/v1/external/payment-methods?currency=UAH" \
+  -H "X-Api-Key: $ECCA_KEY"
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 12,
+      "name": "Monobank",
+      "logo_url": "https://cdn.ecca.example/methods/monobank.png",
+      "currency": { "id": 1, "code": "UAH", "name": "Ukrainian hryvnia", "symbol": "₴" },
+      "min_amount": "100.00",
+      "max_amount": "29999.00",
+      "total_commission_percent": "5.00",
+      "client_commission_percent": "2.00",
+      "merchant_commission_percent": "3.00"
+    }
+  ]
+}
+```
+
+Payment method id. Display name of the method (bank / scheme). Logo URL for your UI. `{ id, code, name, symbol }` — the currency this method settles in. Minimum order amount (fiat) accepted by this method. Maximum order amount (fiat). Your category's total commission ceiling (client \+ merchant share). Added on top of the order amount — paid by the customer. Withheld from your proceeds.
+
+## Commissions
+
+Each method exposes a three-part commission breakdown, all as percentages:
+
+- `client_commission_percent` — added **on top** of the order amount. The customer pays `amount` plus this share; that total is the invoice's `amount_to_send`.
+- `merchant_commission_percent` — **withheld** from what you receive. Your credited USDT is net of this share.
+- `total_commission_percent` — your category's overall ceiling. The client and merchant shares are split within it.
+
+<Callout>
+  These are the rates for your business, resolved per method. They feed directly into invoice pricing: `amount_to_send` on an invoice reflects the client share, and `settled_amount_usdt` reflects the merchant share. See [Invoices](/invoices#amount-adjustments).
+</Callout>
+
+## Errors
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `CATEGORY_NOT_FOUND` | `404` | Your business has no pricing category assigned (configuration issue — contact support) |
+
+The optional `currency` filter never errors on an unknown code — it simply returns an empty list.

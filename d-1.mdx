@@ -1,0 +1,57 @@
+---
+title: "Currencies"
+description: "Current USDT/fiat exchange rates across sources — the live prices and the fiat currencies in play."
+---
+
+`GET /external/rates` returns the current P2P exchange rates for USDT against each active fiat currency, per source and per side. It's how you read live pricing and see which fiat currencies are quoted.
+
+<Callout>
+  Rates show market prices. To know which currencies and amount ranges you can actually charge, use [`GET /external/payment-methods`](/payment-methods) — that is the source of truth for your business.
+</Callout>
+
+## List rates
+
+`GET /external/rates` → `list<RateRead>`
+
+Not paginated — returns the full list. Pairs with no fresh data are omitted.
+
+```bash
+curl https://api.ecca.example/api/v1/external/rates \
+  -H "X-Api-Key: $ECCA_KEY"
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "platform": "binance",
+      "asset": "USDT",
+      "fiat": "UAH",
+      "side": "buy",
+      "price": "41.05",
+      "min_amount": "500.00",
+      "max_amount": "100000.00"
+    },
+    {
+      "platform": "binance",
+      "asset": "USDT",
+      "fiat": "UAH",
+      "side": "sell",
+      "price": "41.20",
+      "min_amount": "500.00",
+      "max_amount": "100000.00"
+    }
+  ]
+}
+```
+
+Rate source, e.g. `binance` or `bybit`. The crypto asset — always `USDT`. Fiat currency code, e.g. `UAH`. `buy` or `sell`. Best-order price for this pair and side. `null` if unavailable. Minimum order amount at the source. Maximum order amount at the source.
+
+## Notes
+
+- Each fiat currency appears once per source and side — so a single currency can have several rows (e.g. `binance/buy`, `binance/sell`, `bybit/buy`).
+- The list reflects live market data and can change between calls; treat it as a snapshot, not a fixed rate.
+- A pair with no fresh data is simply omitted rather than returned with a `null` price.

@@ -1,0 +1,166 @@
+---
+title: "WebHooks"
+description: "Receive and verify settlement callbacks, handle adjustments, and inspect or resend deliveries."
+---
+
+When an invoice reaches a terminal state, we send one `POST` to its `callback_url`. This webhook is the source of truth for fulfillment — act on it, not on the customer returning to your `success_url`.
+
+## What you need to do
+
+<Steps>
+  <Step title="Expose an HTTPS endpoint" title-type="p">
+    Set it as `callback_url` on the invoice, or as your business default. It must accept `POST` with a JSON body.
+  </Step>
+  <Step title="Verify the signature" title-type="p">
+    Confirm the request is from us before trusting it (see [Verifying](#verifying-the-signature)).
+  </Step>
+  <Step title="Respond 2xx quickly" title-type="p">
+    Any `2xx` marks the delivery as received. Do heavy work asynchronously — acknowledge first, process after.
+  </Step>
+  <Step title="Process idempotently" title-type="p">
+    The same event may arrive more than once. Deduplicate on `X-Webhook-Id` (or `invoice_uuid`), and treat a repeat as a no-op.
+  </Step>
+</Steps>
+
+## Events
+
+One terminal webhook per invoice.
+
+| Event | Meaning |
+| --- | --- |
+| `invoice.paid` | The invoice was paid and credited. |
+| `invoice.canceled` | The invoice ended without payment (`expired`, `canceled`, or `fail`). |
+
+## Payload
+
+`invoice.paid`:
+
+```json
+{
+  "event": "invoice.paid",
+  "data": {
+    "invoice_uuid": "9f2c1e5a-...",
+    "external_id": "order-4821",
+    "status": "success",
+    "currency": "UAH",
+    "amount": "1000.00",
+    "credited_usdt": "24.80",
+    "adjusted": true,
+    "original_amount": "1050.00"
+  }
+}
+```
+
+`invoice.canceled`:
+
+```json
+{
+  "event": "invoice.canceled",
+  "data": {
+    "invoice_uuid": "9f2c1e5a-...",
+    "external_id": "order-4821",
+    "status": "expired",
+    "currency": "UAH",
+    "amount": "1050.00",
+    "adjusted": false
+  }
+}
+```
+
+Our order id. Your order id. `success` for paid; `expired` / `canceled` / `fail` for canceled. For `invoice.paid`, the actual paid fiat. For `invoice.canceled`, the original order amount. USDT credited to you. Present on `invoice.paid` only. Whether the paid amount was corrected. The originally ordered fiat. Present only when `adjusted` is `true`.
+
+## Adjustments
+
+<Callout>
+  On `invoice.paid`, always check `adjusted`. When it is `true`, the `amount` is what the customer actually paid — not what you ordered (`original_amount`), and `credited_usdt` is what actually landed. Fulfill against `credited_usdt`, not the original order value, or your books will drift. A paid invoice does not guarantee full payment.
+</Callout>
+
+## Headers
+
+Every delivery carries:
+
+| Header | Purpose |
+| --- | --- |
+| `X-Webhook-Id` | Unique delivery id. Use it to deduplicate. |
+| `X-Webhook-Event` | The event name, e.g. `invoice.paid`. |
+| `X-Webhook-Timestamp` | Signing timestamp. Reject if too old (anti-replay). |
+| `X-Webhook-Signature` | `sha256=<hmac>` — verify this. |
+
+## Verifying the signature
+
+The signature is `HMAC-SHA256` over the string `{timestamp}.{raw_body}`, keyed with your webhook secret (from the dashboard). Compute it over the **raw** request body and compare against `X-Webhook-Signature` with a constant-time check.
+
+<CodeGroup show-lines="true">
+
+```python
+import hashlib
+import hmac
+
+def verify(secret: str, headers, raw_body: bytes) -> bool:
+    ts = headers["X-Webhook-Timestamp"]
+    sig = headers["X-Webhook-Signature"].removeprefix("sha256=")
+    expected = hmac.new(
+        secret.encode(), f"{ts}.{raw_body.decode()}".encode(), hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(expected, sig)
+```
+
+```javascript
+const crypto = require("crypto");
+
+function verify(secret, headers, rawBody) {
+  const ts = headers["x-webhook-timestamp"];
+  const sig = headers["x-webhook-signature"].replace(/^sha256=/, "");
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(`${ts}.${rawBody}`)
+    .digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sig));
+}
+```
+
+</CodeGroup>
+
+<Callout>
+  Reject the request if the signature doesn't match, or if `X-Webhook-Timestamp` is older than a few minutes. The timestamp is inside the signed string, so an attacker can't replay an old body with a fresh timestamp.
+</Callout>
+
+## Retries
+
+A delivery succeeds on any `2xx`. Anything else — a non-2xx status, a timeout (15s), or a connection error — is retried on a backoff schedule.
+
+By default there are **7 attempts**: the first immediately, then after `1`, `5`, `30`, `120`, `360`, and `720` minutes. The last attempt lands roughly 20.6 hours after the event. If all attempts fail, the delivery is marked `failed` — resend it manually once your endpoint is healthy.
+
+## Manual resend
+
+`POST /external/invoices/{ident}/resend-webhook`
+
+Sends the latest delivery for the invoice now — expedites it if still queued, or starts a fresh attempt if it already failed or delivered. `{ident}` is the `order_id` or your `external_id`.
+
+```bash
+curl -X POST \
+  https://api.ecca.example/api/v1/external/invoices/order-4821/resend-webhook \
+  -H "X-Api-Key: $ECCA_KEY"
+```
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `MERCHANT_INVOICE_NOT_FOUND` | `404` | No invoice for the given `ident` |
+| `WEBHOOK_NOT_FOUND` | `404` | The invoice has no webhook delivery yet |
+| `WEBHOOK_NOT_RESENDABLE` | `409` | A delivery is being sent right now |
+| `WEBHOOK_RESEND_TOO_SOON` | `429` | Throttled; retry after `details.retry_after_seconds` |
+
+## Delivery history
+
+`GET /external/invoices/{ident}/webhooks`
+
+Returns the invoice's deliveries, each with its full attempt history — useful to debug failures (status codes, errors, timings).
+
+```bash
+curl https://api.ecca.example/api/v1/external/invoices/order-4821/webhooks \
+  -H "X-Api-Key: $ECCA_KEY"
+```
+
+Each delivery includes:
+
+Delivery id (matches `X-Webhook-Id`). `invoice.paid` or `invoice.canceled`. `pending`, `delivering`, `delivered`, or `failed`. Attempts made so far, out of `max_attempts`. HTTP status of the most recent attempt. When the next retry is scheduled (if any). When a `2xx` was received. Per-attempt log: `status_code`, `success`, `error`, `duration_ms`, `triggered_by`, `created_at`.

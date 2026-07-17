@@ -1,0 +1,86 @@
+---
+title: "Withdrawals"
+description: "List and inspect your payouts. Read-only: withdrawals are requested from your dashboard, this API lets you track them."
+---
+
+These endpoints are **read-only** and scoped to your business by the API key. Use them to track payouts from your own systems — requesting a withdrawal happens in the dashboard, not through this API.
+
+## List withdrawals
+
+`GET /external/withdrawals` → `Page<WithdrawalRead>`
+
+1-based page number. Items per page. Filter by status: `pending`, `approved`, `rejected`.
+
+```bash
+curl "https://api.ecca.example/api/v1/external/withdrawals?status=approved" \
+  -H "X-Api-Key: $ECCA_KEY"
+```
+
+Returns the standard [page envelope](/introduction#pagination); each item is a withdrawal (see [fields](#fields)).
+
+## Get a withdrawal
+
+`GET /external/withdrawals/{withdrawal_uuid}` → `WithdrawalRead`
+
+```bash
+curl https://api.ecca.example/api/v1/external/withdrawals/3af1... \
+  -H "X-Api-Key: $ECCA_KEY"
+```
+
+| Code | HTTP | When |
+| --- | --- | --- |
+| `WITHDRAWAL_NOT_FOUND` | `404` | No withdrawal with that `uuid` in your business |
+
+## Fields
+
+```json
+{
+  "success": true,
+  "data": {
+    "uuid": "3af1c2d4-...",
+    "token": "USDT",
+    "network": "TRC20",
+    "address": "TQ...destination",
+    "amount": "500.00",
+    "network_commission": "1.00",
+    "amount_to_send": "499.00",
+    "status": "approved",
+    "tx_hash": "a1b2c3...",
+    "reject_code": null,
+    "reject_reason": null,
+    "logo_url": "https://cdn.ecca.example/networks/trc20.png",
+    "created_at": "2026-07-16T09:24:11Z",
+    "processed_at": "2026-07-16T09:40:02Z"
+  }
+}
+```
+
+Withdrawal id. Payout asset, e.g. `USDT`. Blockchain network, e.g. `TRC20`. Destination wallet address. Requested amount. Network fee deducted. What is actually sent to the address (`amount` minus `network_commission`). `pending`, `approved`, or `rejected`. See [Lifecycle](#lifecycle). On-chain transaction hash. Present once `approved`. Machine reason when `rejected` (see below). Free-text reason, when no code applies. Network/method logo for your UI. When the withdrawal was requested. When it was approved or rejected.
+
+## Lifecycle
+
+<ResponseField name="pending" required="false" deprecated="false">
+  Requested and awaiting review. The balance is already reserved.
+</ResponseField>
+
+<ResponseField name="approved" required="false" deprecated="false">
+  Sent on-chain — `tx_hash` is populated. Track it on the network explorer.
+</ResponseField>
+
+<ResponseField name="rejected" required="false" deprecated="false">
+  Declined; the balance is returned. See `reject_code` / `reject_reason`.
+</ResponseField>
+
+## Reject codes
+
+When a withdrawal is `rejected`, `reject_code` is one of:
+
+| Code | Meaning |
+| --- | --- |
+| `transfer_error` | On-chain transfer failed |
+| `invalid_address` | Destination address is invalid |
+| `suspicious_activity` | Flagged during review |
+| `amount_issue` | Problem with the requested amount |
+| `verification_required` | Additional verification needed |
+
+If none applies, `reject_code` is `null` and `reject_reason` carries a free-text explanation.
